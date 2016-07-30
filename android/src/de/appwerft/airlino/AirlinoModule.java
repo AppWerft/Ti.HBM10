@@ -28,7 +28,10 @@ public class AirlinoModule extends KrollModule {
 	NsdManager nsdManager;
 	private KrollFunction onFoundCallback = null;
 	private KrollFunction onLostCallback = null;
-	String dnsType = "_dockset._tcp.";
+	String DNSTYPE = "_dockset._tcp.";
+	String host = null;
+	String port = null;
+	String endpoint = null;
 	// You can define constants with @Kroll.constant, for example:
 
 	public NsdManager.ResolveListener resolveListener;
@@ -48,10 +51,11 @@ public class AirlinoModule extends KrollModule {
 			@Override
 			public void onServiceResolved(NsdServiceInfo serviceInfo) {
 				Log.e(LCAT, "Resolve Succeeded. " + serviceInfo);
-				if (onFoundCallback != null)
-					onFoundCallback.call(getKrollObject(),
-							parseNsdServiceInfo(serviceInfo));
+				if (onFoundCallback != null) {
+					KrollDict event = parseNsdServiceInfo(serviceInfo);
+					onFoundCallback.call(getKrollObject(), event);
 
+				}
 			}
 		};
 	}
@@ -76,7 +80,7 @@ public class AirlinoModule extends KrollModule {
 				onFoundCallback = (KrollFunction) fcallback;
 			}
 		}
-		if (opt.containsKeyAndNotNull("onLost")) {
+		if (opt.containsKeyAndNotNull("onError")) {
 			lcallback = opt.get("onFound");
 			if (lcallback instanceof KrollFunction) {
 				onLostCallback = (KrollFunction) lcallback;
@@ -93,7 +97,6 @@ public class AirlinoModule extends KrollModule {
 		discListener = new NsdManager.DiscoveryListener() {
 			@Override
 			public void onDiscoveryStarted(String regType) {
-				Log.d(LCAT, "Service discovery started");
 			}
 
 			@Override
@@ -125,21 +128,25 @@ public class AirlinoModule extends KrollModule {
 				nsdManager.stopServiceDiscovery(this);
 			}
 		};
-		nsdManager.discoverServices(dnsType, NsdManager.PROTOCOL_DNS_SD,
+		nsdManager.discoverServices(DNSTYPE, NsdManager.PROTOCOL_DNS_SD,
 				discListener);
 
 	}
 
 	private KrollDict parseNsdServiceInfo(NsdServiceInfo so) {
+		endpoint = "http://";
 		KrollDict dict = new KrollDict();
 		Log.d(LCAT, so.toString());
 		InetAddress address = so.getHost();
 		if (address != null) {
 			dict.put("ip", address.getHostAddress());
+			endpoint += address.getHostAddress();
 		}
 		dict.put("port", so.getPort());
+		endpoint += (":" + so.getPort() + "/api/v15/radio.action");
 		dict.put("name", so.getServiceName());
 		dict.put("type", so.getServiceType());
+		dict.put("endpoint", endpoint);
 		Log.d(LCAT, dict.toString());
 
 		return dict;

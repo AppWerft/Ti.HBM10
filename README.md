@@ -16,8 +16,26 @@ First you can detect all devices in your Wifi:
 var Airlino = require("de.appwerft.airlino");
 Airlino.connect({
     onSuccess: function(_e) {
-        Airlino.play("http://…");
+        Airlino.playStation({
+            url:"http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m,
+            station : "Deutschlandfunk"});
+        Airlino.setFavoriteStation({
+            url:"http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m,
+            station : "Deutschlandfunk"
+        });
         Airlino.stop();
+        Airlino.getCurrentStation({
+            onSuccess: function(_e) {
+            }
+        });
+        Airlino.getFavoriteStation({
+            onSuccess: function(_e) {
+            }
+        });
+        Airlino.getPlaylist({
+            onSuccess: function(_e) {
+            }
+        });
     },
     onError: function() {
         console.log("not found");
