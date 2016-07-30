@@ -1,5 +1,7 @@
 #TiAirlino
 
+Airlino is a devives for Wifi transmission for in highest level.
+
 This is a Titanium module for handling airlino device.
 
 
