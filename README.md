@@ -14,9 +14,14 @@ First you can detect all devices in your Wifi:
 
 ```javascript
 var Airlino = require("de.appwerft.airlino");
-Airlino.getAllDevices(function(_e) {
-    Airlino.setDevice(_e.devices[0]);
-    Airlino.play("http://…");
+Airlino.connect({
+    onSuccess: function(_e) {
+        Airlino.play("http://…");
+        Airlino.stop();
+    },
+    onError: function() {
+        console.log("not found");
+    }
 });
 
 ```

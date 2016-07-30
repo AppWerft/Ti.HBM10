@@ -8,58 +8,140 @@
  */
 package de.appwerft.airlino;
 
+import java.net.InetAddress;
+
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.kroll.KrollFunction;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
-
-import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.kroll.common.Log;
-import org.appcelerator.kroll.common.TiConfig;
+import org.appcelerator.titanium.TiApplication;
 
+import android.content.Context;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 
-@Kroll.module(name="Airlino", id="de.appwerft.airlino")
-public class AirlinoModule extends KrollModule
-{
-
-	// Standard Debugging variables
-	private static final String LCAT = "AirlinoModule";
-	private static final boolean DBG = TiConfig.LOGD;
-
+@Kroll.module(name = "Airlino", id = "de.appwerft.airlino")
+public class AirlinoModule extends KrollModule {
+	private static final String LCAT = "BONJOUR 😈";
+	Context ctx;
+	NsdManager nsdManager;
+	private KrollFunction onFoundCallback = null;
+	private KrollFunction onLostCallback = null;
+	String dnsType = "_dockset._tcp.";
 	// You can define constants with @Kroll.constant, for example:
-	// @Kroll.constant public static final String EXTERNAL_NAME = value;
 
-	public AirlinoModule()
-	{
+	public NsdManager.ResolveListener resolveListener;
+	public NsdManager.DiscoveryListener discListener = null;
+
+	public AirlinoModule() {
 		super();
+		resolveListener = new NsdManager.ResolveListener() {
+			@Override
+			public void onResolveFailed(NsdServiceInfo serviceInfo,
+					int errorCode) {
+				// Called when the resolve fails. Use the error
+				// code to debug.
+				Log.e(LCAT, "Resolve failed" + errorCode);
+			}
+
+			@Override
+			public void onServiceResolved(NsdServiceInfo serviceInfo) {
+				Log.e(LCAT, "Resolve Succeeded. " + serviceInfo);
+				if (onFoundCallback != null)
+					onFoundCallback.call(getKrollObject(),
+							parseNsdServiceInfo(serviceInfo));
+
+			}
+		};
 	}
 
 	@Kroll.onAppCreate
-	public static void onAppCreate(TiApplication app)
-	{
-		Log.d(LCAT, "inside onAppCreate");
-		// put module init code that needs to run when the application is created
+	public static void onAppCreate(TiApplication app) {
 	}
 
-	// Methods
+	public void onDestroy() {
+		if (discListener != null)
+			nsdManager.stopServiceDiscovery(discListener);
+	}
+
 	@Kroll.method
-	public String example()
-	{
-		Log.d(LCAT, "example called");
-		return "hello world";
+	public void connect(KrollDict opt) {
+		Object fcallback;
+		Object lcallback;
+
+		if (opt.containsKeyAndNotNull("onSuccess")) {
+			fcallback = opt.get("onSucces");
+			if (fcallback instanceof KrollFunction) {
+				onFoundCallback = (KrollFunction) fcallback;
+			}
+		}
+		if (opt.containsKeyAndNotNull("onLost")) {
+			lcallback = opt.get("onFound");
+			if (lcallback instanceof KrollFunction) {
+				onLostCallback = (KrollFunction) lcallback;
+			}
+		}
+		this.initializeDiscoveryListener();
 	}
 
-	// Properties
-	@Kroll.getProperty
-	public String getExampleProp()
-	{
-		Log.d(LCAT, "get example property");
-		return "hello world";
+	private void initializeDiscoveryListener() {
+		ctx = TiApplication.getInstance().getApplicationContext();
+		nsdManager = (NsdManager) ctx.getSystemService(Context.NSD_SERVICE);
+		Log.d(LCAT, "initializeDiscoveryListener = " + nsdManager.toString());
+
+		discListener = new NsdManager.DiscoveryListener() {
+			@Override
+			public void onDiscoveryStarted(String regType) {
+				Log.d(LCAT, "Service discovery started");
+			}
+
+			@Override
+			public void onServiceFound(NsdServiceInfo service) {
+				nsdManager.resolveService(service, resolveListener);
+			}
+
+			@Override
+			public void onServiceLost(NsdServiceInfo service) {
+				if (onLostCallback != null)
+					onLostCallback.call(getKrollObject(),
+							parseNsdServiceInfo(service));
+			}
+
+			@Override
+			public void onDiscoveryStopped(String serviceType) {
+				Log.i(LCAT, "Discovery stopped: " + serviceType);
+			}
+
+			@Override
+			public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+				Log.e(LCAT, "Discovery failed: Error code:" + errorCode);
+				nsdManager.stopServiceDiscovery(this);
+			}
+
+			@Override
+			public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+				Log.e(LCAT, "Discovery failed: Error code:" + errorCode);
+				nsdManager.stopServiceDiscovery(this);
+			}
+		};
+		nsdManager.discoverServices(dnsType, NsdManager.PROTOCOL_DNS_SD,
+				discListener);
+
 	}
 
+	private KrollDict parseNsdServiceInfo(NsdServiceInfo so) {
+		KrollDict dict = new KrollDict();
+		Log.d(LCAT, so.toString());
+		InetAddress address = so.getHost();
+		if (address != null) {
+			dict.put("ip", address.getHostAddress());
+		}
+		dict.put("port", so.getPort());
+		dict.put("name", so.getServiceName());
+		dict.put("type", so.getServiceType());
+		Log.d(LCAT, dict.toString());
 
-	@Kroll.setProperty
-	public void setExampleProp(String value) {
-		Log.d(LCAT, "set example property: " + value);
+		return dict;
 	}
-
 }
-

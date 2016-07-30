@@ -5,13 +5,13 @@
 version: 1.0.0
 apiversion: 2
 architectures: armeabi armeabi-v7a x86
-description: airlino
+description: Airlino
 author: Rainer Schleevoigt
 license: Specify your license
 copyright: Copyright (c) 2016 by 
 
 # these should not be edited
-name: airlino
+name: Airlino
 moduleid: de.appwerft.airlino
 guid: c17ac4f6-c466-4801-a3ab-5691d34f03ec
 platform: android
