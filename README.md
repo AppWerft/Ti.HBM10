@@ -12,15 +12,16 @@ This is a Titanium module for handling airlino device.
 
 
 ```javascript
+var URL = "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
 var Airlino = require("de.appwerft.airlino");
 Airlino.connect({
     onSuccess: function(_e) {
         Airlino.playStation({
-            url : "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m,
+            url : URL,
             station : "Deutschlandfunk"
         });
         Airlino.setFavoriteStation({
-            url : "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m,
+            url : URL,
             station : "Deutschlandfunk"
         });
         Airlino.stop();
