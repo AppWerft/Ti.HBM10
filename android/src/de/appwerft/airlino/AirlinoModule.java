@@ -17,9 +17,11 @@ import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiApplication;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.provider.Settings;
 
 @Kroll.module(name = "Airlino", id = "de.appwerft.airlino")
 public class AirlinoModule extends KrollModule {
@@ -32,8 +34,7 @@ public class AirlinoModule extends KrollModule {
 	String host = null;
 	String port = null;
 	String endpoint = null;
-	// You can define constants with @Kroll.constant, for example:
-
+	int scanTimeout = 10;
 	public NsdManager.ResolveListener resolveListener;
 	public NsdManager.DiscoveryListener discListener = null;
 
@@ -86,14 +87,23 @@ public class AirlinoModule extends KrollModule {
 				onLostCallback = (KrollFunction) lcallback;
 			}
 		}
+		if (opt.containsKeyAndNotNull("timeout")) {
+			scanTimeout = opt.getInt("timeout");
+		}
 		this.initializeDiscoveryListener();
+
+	}
+
+	private void stopDiscoveryListener() {
+		if (discListener == null)
+			return;
+		nsdManager.stopServiceDiscovery(discListener);
 	}
 
 	private void initializeDiscoveryListener() {
 		ctx = TiApplication.getInstance().getApplicationContext();
 		nsdManager = (NsdManager) ctx.getSystemService(Context.NSD_SERVICE);
 		Log.d(LCAT, "initializeDiscoveryListener = " + nsdManager.toString());
-
 		discListener = new NsdManager.DiscoveryListener() {
 			@Override
 			public void onDiscoveryStarted(String regType) {
@@ -130,7 +140,13 @@ public class AirlinoModule extends KrollModule {
 		};
 		nsdManager.discoverServices(DNSTYPE, NsdManager.PROTOCOL_DNS_SD,
 				discListener);
-
+		new android.os.Handler().postDelayed(new Runnable() {
+			public void run() {
+				stopDiscoveryListener();
+				Log.d(LCAT, "discoveryService ended after " + scanTimeout
+						+ " seconds.");
+			}
+		}, scanTimeout * 1000);
 	}
 
 	private KrollDict parseNsdServiceInfo(NsdServiceInfo so) {
@@ -148,7 +164,6 @@ public class AirlinoModule extends KrollModule {
 		dict.put("type", so.getServiceType());
 		dict.put("endpoint", endpoint);
 		Log.d(LCAT, dict.toString());
-
 		return dict;
 	}
 }
