@@ -31,28 +31,17 @@ public class AirlinoModule extends KrollModule {
 	private KrollFunction onErrorCallback = null;
 	private KrollFunction onResultCallback = null;
 	private boolean isPingActive = false;
+	private boolean wasPingSuccessful = false;
 	String DNSTYPE = "_dockset._tcp.";
-	String host = null;
-	String port = null;
-	String endpoint = null;
 	int scanTimeout = 2000;
-	int pingTimeout = 2000;
+	int pingTimeout = 1000;
 	AirlinoDevices aDevices = new AirlinoDevices();
 
 	public NsdManager.ResolveListener resolveListener;
 	public NsdManager.DiscoveryListener discListener = null;
-	private Activity activity;
 
 	public AirlinoModule() {
 		super();
-		activity = TiApplication.getInstance().getRootOrCurrentActivity();
-		/*
-		 * When your application finds a service on the network to connect to,
-		 * it must first determine the connection information for that service,
-		 * using the resolveService() method. Implement a
-		 * NsdManager.ResolveListener to pass into this method, and use it to
-		 * get a NsdServiceInfo containing the connection information.
-		 */
 		resolveListener = new NsdManager.ResolveListener() {
 			@Override
 			public void onResolveFailed(NsdServiceInfo serviceInfo,
@@ -64,21 +53,24 @@ public class AirlinoModule extends KrollModule {
 
 			@Override
 			public void onServiceResolved(NsdServiceInfo serviceInfo) {
-				Log.d(LCAT, "Resolve Succeeded. " + serviceInfo);
-				if (onSuccessCallback != null) {
-					Log.e(LCAT, "callback prep. ");
-					KrollDict event = parseNsdServiceInfo(serviceInfo);
-					if (isPingActive) {
-						KrollDict result = new KrollDict();
-						result.put("result", true);
-						isPingActive = false;
-						stopDiscoveryListener();
+				Log.d(LCAT, "Resolve succeeded. " + serviceInfo);
+
+				if (isPingActive) {
+					wasPingSuccessful = true;
+					KrollDict result = new KrollDict();
+					result.put("result", true);
+					isPingActive = false;
+					stopDiscoveryListener();
+					Log.d(LCAT, "stopDiscoveryListener()");
+					if (onResultCallback != null)
 						onResultCallback.call(getKrollObject(), result);
-					} else {
-						onSuccessCallback.call(getKrollObject(), event);
+				} else {
+					aDevices.add(AirlinoDevice.parseNsdServiceInfo(serviceInfo));
+					if (onSuccessCallback != null) {
+						onSuccessCallback.call(getKrollObject(),
+								aDevices.getAllDevices());
 					}
-				} else
-					Log.w(LCAT, " no callback found");
+				}
 			}
 		};
 	}
@@ -87,18 +79,6 @@ public class AirlinoModule extends KrollModule {
 	public static void onAppCreate(TiApplication app) {
 	}
 
-	/*
-	 * Activity Lifecycle Events Starting with Titanium SDK 4.0.0, a proxy can
-	 * respond to activity lifecycle events by overriding the activity lifecycle
-	 * callbacks, then in the JavaScript application, assign either a Window or
-	 * TabGroup object to the proxy's lifecycleContainer property when creating
-	 * the module proxy to monitor the lifecycle events of that object to
-	 * trigger the module proxy's lifecycle events. First, in the module proxy,
-	 * override the activity lifecycle callbacks you want to respond to, such as
-	 * onCreate, onStart, onRestart, onResume, onPause, onStop or onDestroy.
-	 */
-
-	// following
 	// https://github.com/appcelerator-modules/ti.moddevguide/blob/master/android/src/ti/moddevguide/ModdevguideModule.java
 	@Override
 	public void onPause(Activity a) {
@@ -110,6 +90,7 @@ public class AirlinoModule extends KrollModule {
 	@Override
 	public void onResume(Activity a) {
 		super.onResume(a);
+		Log.d(LCAT, "onResume");
 		this.initializeDiscoveryListener();
 	}
 
@@ -118,13 +99,15 @@ public class AirlinoModule extends KrollModule {
 			nsdManager.stopServiceDiscovery(discListener);
 	}
 
-	public void onDestroy() {
+	public void onDestroy(Activity a) {
 		tearDown();
+		super.onDestroy(a);
 	}
 
 	@Kroll.method
 	public void isAvailable(KrollDict opt) {
 		Object callback;
+		wasPingSuccessful = false;
 		if (opt.containsKeyAndNotNull("onResult")) {
 			callback = opt.get("onResult");
 			if (callback instanceof KrollFunction) {
@@ -165,7 +148,6 @@ public class AirlinoModule extends KrollModule {
 	}
 
 	private void stopDiscoveryListener() {
-
 		try {
 			nsdManager.stopServiceDiscovery(discListener);
 		} catch (Exception e) {
@@ -192,9 +174,6 @@ public class AirlinoModule extends KrollModule {
 			/* a device is lost */
 			@Override
 			public void onServiceLost(NsdServiceInfo service) {
-				if (onErrorCallback != null)
-					onErrorCallback.call(getKrollObject(),
-							parseNsdServiceInfo(service));
 			}
 
 			@Override
@@ -214,12 +193,13 @@ public class AirlinoModule extends KrollModule {
 				nsdManager.stopServiceDiscovery(this);
 			}
 		};
+
 		nsdManager.discoverServices(DNSTYPE, NsdManager.PROTOCOL_DNS_SD,
 				discListener);
 
 		new android.os.Handler().postDelayed(new Runnable() {
 			public void run() {
-				if (isPingActive) {
+				if (isPingActive && wasPingSuccessful == false) {
 					stopDiscoveryListener();
 					if (onResultCallback != null) {
 						KrollDict result = new KrollDict();
@@ -228,28 +208,17 @@ public class AirlinoModule extends KrollModule {
 					}
 					isPingActive = false;
 				}
-
-				Log.d(LCAT, "discoveryService ended after " + scanTimeout
-						+ " seconds.");
 			}
 		}, (isPingActive) ? pingTimeout : scanTimeout);
 	}
-
-	private KrollDict parseNsdServiceInfo(NsdServiceInfo so) {
-		endpoint = "http://";
-		KrollDict dict = new KrollDict();
-		Log.d(LCAT, so.toString());
-		Log.d(LCAT, "============");
-		InetAddress address = so.getHost();
-		if (address != null) {
-			dict.put("ip", address.getHostAddress());
-			endpoint += address.getHostAddress();
-		}
-		dict.put("port", so.getPort());
-		endpoint += (":" + so.getPort() + "/api/v15/radio.action");
-		dict.put("name", so.getServiceName());
-		dict.put("endpoint", endpoint);
-		Log.d(LCAT, dict.toString());
-		return dict;
-	}
+	/*
+	 * private AirlinoDevice parseNsdServiceInfo(NsdServiceInfo so) { endpoint =
+	 * "http://"; AirlinoDevice device = new AirlinoDevice(); InetAddress
+	 * address = so.getHost(); if (address != null) {
+	 * device.setHost(address.getHostAddress()); endpoint +=
+	 * address.getHostAddress(); } device.setPort(so.getPort()); endpoint +=
+	 * (":" + so.getPort() + "/api/v15/radio.action");
+	 * device.setName(so.getServiceName()); device.setEndpoint(endpoint); return
+	 * device; }
+	 */
 }

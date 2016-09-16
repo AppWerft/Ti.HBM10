@@ -1,54 +1,68 @@
 package de.appwerft.airlino;
 
+import java.net.InetAddress;
+import android.net.nsd.NsdServiceInfo;
+
 public class AirlinoDevice {
-	private String host;
+	private String endpoint;
 
 	/**
-	 * @return the host
+	 * @return the endpoint
 	 */
+	public String getEndpoint() {
+		return endpoint;
+	}
+
+	/**
+	 * @param endpoint
+	 *            the endpoint to set
+	 */
+	public void setEndpoint(String endpoint) {
+		this.endpoint = endpoint;
+	}
+
+	private String host;
+
 	public String getHost() {
 		return host;
 	}
 
-	/**
-	 * @param host
-	 *            the host to set
-	 */
 	public void setHost(String host) {
 		this.host = host;
 	}
 
-	/**
-	 * @return the name
-	 */
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	/**
-	 * @return the port
-	 */
 	public int getPort() {
 		return port;
 	}
 
-	/**
-	 * @param port
-	 *            the port to set
-	 */
 	public void setPort(int port) {
 		this.port = port;
 	}
 
 	private String name;
 	private int port;
+
+	public static AirlinoDevice parseNsdServiceInfo(NsdServiceInfo so) {
+		String endpoint = "http://";
+		AirlinoDevice device = new AirlinoDevice();
+		InetAddress address = so.getHost();
+		if (address != null) {
+			device.setHost(address.getHostAddress());
+			endpoint += address.getHostAddress();
+		}
+		device.setPort(so.getPort());
+		endpoint += (":" + so.getPort() + "/api/v15/radio.action");
+		device.setName(so.getServiceName());
+		device.setEndpoint(endpoint);
+		return device;
+	}
 
 }
