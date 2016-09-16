@@ -30,11 +30,15 @@ public class AirlinoModule extends KrollModule {
 	NsdManager nsdManager;
 	private KrollFunction onSuccessCallback = null;
 	private KrollFunction onErrorCallback = null;
+	private KrollFunction onResultCallback = null;
+	private boolean isPingActive = false;
 	String DNSTYPE = "_dockset._tcp.";
 	String host = null;
 	String port = null;
 	String endpoint = null;
-	int scanTimeout = 10;
+	int scanTimeout = 2000;
+	int pingTimeout = 2000;
+
 	public NsdManager.ResolveListener resolveListener;
 	public NsdManager.DiscoveryListener discListener = null;
 
@@ -55,7 +59,15 @@ public class AirlinoModule extends KrollModule {
 				if (onSuccessCallback != null) {
 					Log.e(LCAT, "callback prep. ");
 					KrollDict event = parseNsdServiceInfo(serviceInfo);
-					onSuccessCallback.call(getKrollObject(), event);
+					if (isPingActive) {
+						KrollDict result = new KrollDict();
+						result.put("result", true);
+						isPingActive = false;
+						stopDiscoveryListener();
+						onResultCallback.call(getKrollObject(), result);
+					} else {
+						onSuccessCallback.call(getKrollObject(), event);
+					}
 				} else
 					Log.w(LCAT, " no callback found");
 			}
@@ -72,7 +84,25 @@ public class AirlinoModule extends KrollModule {
 	}
 
 	@Kroll.method
-	public void connect(KrollDict opt) {
+	public void isAvailable(KrollDict opt) {
+		Object callback;
+		if (opt.containsKeyAndNotNull("onResult")) {
+			callback = opt.get("onResult");
+			if (callback instanceof KrollFunction) {
+				onResultCallback = (KrollFunction) callback;
+			} else
+				Log.w(LCAT, "onSuccessFn missed");
+		} else
+			Log.w(LCAT, "onSuccess missed");
+		if (opt.containsKeyAndNotNull("timeout")) {
+			scanTimeout = opt.getInt("timeout");
+		}
+		isPingActive = true;
+		this.initializeDiscoveryListener();
+	}
+
+	@Kroll.method
+	public void startScan(KrollDict opt) {
 		Object callback;
 		if (opt.containsKeyAndNotNull("onSuccess")) {
 			callback = opt.get("onSuccess");
@@ -146,11 +176,20 @@ public class AirlinoModule extends KrollModule {
 				discListener);
 		new android.os.Handler().postDelayed(new Runnable() {
 			public void run() {
-				stopDiscoveryListener();
+				if (isPingActive) {
+					stopDiscoveryListener();
+					if (onResultCallback != null) {
+						KrollDict result = new KrollDict();
+						result.put("result", false);
+						onResultCallback.call(getKrollObject(), result);
+					}
+					isPingActive = false;
+				}
+
 				Log.d(LCAT, "discoveryService ended after " + scanTimeout
 						+ " seconds.");
 			}
-		}, scanTimeout * 1000);
+		}, (isPingActive) ? pingTimeout : scanTimeout);
 	}
 
 	private KrollDict parseNsdServiceInfo(NsdServiceInfo so) {
