@@ -15,6 +15,7 @@ public class AirlinoDevices extends ArrayList<AirlinoDevice> {
 	}
 
 	public Object[] getAllDevices() {
+		// for usage in KrollDict
 		return this.toArray();
 	}
 
