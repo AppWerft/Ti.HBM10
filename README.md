@@ -14,8 +14,9 @@ This is a Titanium module for handling airlino device.
 ```javascript
 var URL = "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
 var Airlino = require("de.appwerft.airlino");
+var devices = [];
 
-
+// test if at leat one is available (i.e. for activating button)
 Airlino.isAvailable({
     timeout : 2000,
     onResult : function(e) {
@@ -25,7 +26,8 @@ Airlino.isAvailable({
 
 Airlino.startScan({
     onSuccess: function(e) {
-        e.devices.forEach(function(device){
+        devices = e.devices;
+        devices.forEach(function(device){
             console.log(device.name + " " + device.endpoint);
         });
     },
@@ -35,5 +37,11 @@ Airlino.startScan({
 });
 
 Airlino.stopScan();
+
+
+Airlino.play({
+    device : device[0],
+    url : URL
+});
 
 ```
