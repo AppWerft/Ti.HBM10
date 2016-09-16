@@ -25,11 +25,11 @@ import android.provider.Settings;
 
 @Kroll.module(name = "Airlino", id = "de.appwerft.airlino")
 public class AirlinoModule extends KrollModule {
-	private static final String LCAT = "BONJOUR 😈";
+	private static final String LCAT = "AirLino 😈";
 	Context ctx;
 	NsdManager nsdManager;
-	private KrollFunction onFoundCallback = null;
-	private KrollFunction onLostCallback = null;
+	private KrollFunction onSuccessCallback = null;
+	private KrollFunction onErrorCallback = null;
 	String DNSTYPE = "_dockset._tcp.";
 	String host = null;
 	String port = null;
@@ -51,12 +51,13 @@ public class AirlinoModule extends KrollModule {
 
 			@Override
 			public void onServiceResolved(NsdServiceInfo serviceInfo) {
-				Log.e(LCAT, "Resolve Succeeded. " + serviceInfo);
-				if (onFoundCallback != null) {
+				Log.d(LCAT, "Resolve Succeeded. " + serviceInfo);
+				if (onSuccessCallback != null) {
+					Log.e(LCAT, "callback prep. ");
 					KrollDict event = parseNsdServiceInfo(serviceInfo);
-					onFoundCallback.call(getKrollObject(), event);
-
-				}
+					onSuccessCallback.call(getKrollObject(), event);
+				} else
+					Log.w(LCAT, " no callback found");
 			}
 		};
 	}
@@ -72,19 +73,19 @@ public class AirlinoModule extends KrollModule {
 
 	@Kroll.method
 	public void connect(KrollDict opt) {
-		Object fcallback;
-		Object lcallback;
-
+		Object callback;
 		if (opt.containsKeyAndNotNull("onSuccess")) {
-			fcallback = opt.get("onSucces");
-			if (fcallback instanceof KrollFunction) {
-				onFoundCallback = (KrollFunction) fcallback;
-			}
-		}
+			callback = opt.get("onSuccess");
+			if (callback instanceof KrollFunction) {
+				onSuccessCallback = (KrollFunction) callback;
+			} else
+				Log.w(LCAT, "onSuccessFn missed");
+		} else
+			Log.w(LCAT, "onSuccess missed");
 		if (opt.containsKeyAndNotNull("onError")) {
-			lcallback = opt.get("onFound");
-			if (lcallback instanceof KrollFunction) {
-				onLostCallback = (KrollFunction) lcallback;
+			callback = opt.get("onFound");
+			if (callback instanceof KrollFunction) {
+				onErrorCallback = (KrollFunction) callback;
 			}
 		}
 		if (opt.containsKeyAndNotNull("timeout")) {
@@ -95,15 +96,18 @@ public class AirlinoModule extends KrollModule {
 	}
 
 	private void stopDiscoveryListener() {
-		if (discListener == null)
-			return;
-		nsdManager.stopServiceDiscovery(discListener);
+
+		try {
+			nsdManager.stopServiceDiscovery(discListener);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void initializeDiscoveryListener() {
 		ctx = TiApplication.getInstance().getApplicationContext();
 		nsdManager = (NsdManager) ctx.getSystemService(Context.NSD_SERVICE);
-		Log.d(LCAT, "initializeDiscoveryListener = " + nsdManager.toString());
 		discListener = new NsdManager.DiscoveryListener() {
 			@Override
 			public void onDiscoveryStarted(String regType) {
@@ -116,8 +120,8 @@ public class AirlinoModule extends KrollModule {
 
 			@Override
 			public void onServiceLost(NsdServiceInfo service) {
-				if (onLostCallback != null)
-					onLostCallback.call(getKrollObject(),
+				if (onErrorCallback != null)
+					onErrorCallback.call(getKrollObject(),
 							parseNsdServiceInfo(service));
 			}
 
@@ -153,6 +157,7 @@ public class AirlinoModule extends KrollModule {
 		endpoint = "http://";
 		KrollDict dict = new KrollDict();
 		Log.d(LCAT, so.toString());
+		Log.d(LCAT, "============");
 		InetAddress address = so.getHost();
 		if (address != null) {
 			dict.put("ip", address.getHostAddress());

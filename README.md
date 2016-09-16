@@ -14,33 +14,26 @@ This is a Titanium module for handling airlino device.
 ```javascript
 var URL = "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
 var Airlino = require("de.appwerft.airlino");
-Airlino.connect({
-    onSuccess: function(_e) {
-        Airlino.playStation({
-            url : URL,
-            station : "Deutschlandfunk"
-        });
-        Airlino.setFavoriteStation({
-            url : URL,
-            station : "Deutschlandfunk"
-        });
-        Airlino.stop();
-        Airlino.getCurrentStation({
-            onSuccess: function(_e) {
-            }
-        });
-        Airlino.getFavoriteStation({
-            onSuccess: function(_e) {
-            }
-        });
-        Airlino.getPlaylist({
-            onSuccess: function(_e) {
-            }
+
+
+Airlino.isAvailable({
+    timeout : 2000,
+    onResult : function(e) {
+        console.log(e.found); // true or false
+    }
+})
+
+Airlino.startScan({
+    onSuccess: function(e) {
+        e.devices.forEach(function(device){
+            console.log(device.name + " " + device.endpoint);
         });
     },
     onError: function() {
         console.log("not found");
     }
 });
+
+Airlino.stopScan();
 
 ```
