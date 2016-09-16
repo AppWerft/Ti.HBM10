@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.provider.Settings;
 
 @Kroll.module(name = "Airlino", id = "de.appwerft.airlino")
 public class AirlinoModule extends KrollModule {
@@ -38,12 +37,22 @@ public class AirlinoModule extends KrollModule {
 	String endpoint = null;
 	int scanTimeout = 2000;
 	int pingTimeout = 2000;
+	AirlinoDevices aDevices = new AirlinoDevices();
 
 	public NsdManager.ResolveListener resolveListener;
 	public NsdManager.DiscoveryListener discListener = null;
+	private Activity activity;
 
 	public AirlinoModule() {
 		super();
+		activity = TiApplication.getInstance().getRootOrCurrentActivity();
+		/*
+		 * When your application finds a service on the network to connect to,
+		 * it must first determine the connection information for that service,
+		 * using the resolveService() method. Implement a
+		 * NsdManager.ResolveListener to pass into this method, and use it to
+		 * get a NsdServiceInfo containing the connection information.
+		 */
 		resolveListener = new NsdManager.ResolveListener() {
 			@Override
 			public void onResolveFailed(NsdServiceInfo serviceInfo,
@@ -78,9 +87,39 @@ public class AirlinoModule extends KrollModule {
 	public static void onAppCreate(TiApplication app) {
 	}
 
-	public void onDestroy() {
+	/*
+	 * Activity Lifecycle Events Starting with Titanium SDK 4.0.0, a proxy can
+	 * respond to activity lifecycle events by overriding the activity lifecycle
+	 * callbacks, then in the JavaScript application, assign either a Window or
+	 * TabGroup object to the proxy's lifecycleContainer property when creating
+	 * the module proxy to monitor the lifecycle events of that object to
+	 * trigger the module proxy's lifecycle events. First, in the module proxy,
+	 * override the activity lifecycle callbacks you want to respond to, such as
+	 * onCreate, onStart, onRestart, onResume, onPause, onStop or onDestroy.
+	 */
+
+	// following
+	// https://github.com/appcelerator-modules/ti.moddevguide/blob/master/android/src/ti/moddevguide/ModdevguideModule.java
+	@Override
+	public void onPause(Activity a) {
+		tearDown();
+		super.onPause(a);
+
+	}
+
+	@Override
+	public void onResume(Activity a) {
+		super.onResume(a);
+		this.initializeDiscoveryListener();
+	}
+
+	private void tearDown() {
 		if (discListener != null)
 			nsdManager.stopServiceDiscovery(discListener);
+	}
+
+	public void onDestroy() {
+		tearDown();
 	}
 
 	@Kroll.method
@@ -130,7 +169,6 @@ public class AirlinoModule extends KrollModule {
 		try {
 			nsdManager.stopServiceDiscovery(discListener);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -141,13 +179,17 @@ public class AirlinoModule extends KrollModule {
 		discListener = new NsdManager.DiscoveryListener() {
 			@Override
 			public void onDiscoveryStarted(String regType) {
+				Log.d(LCAT, "Service discovery started");
+
 			}
 
+			/* a new device is found */
 			@Override
 			public void onServiceFound(NsdServiceInfo service) {
 				nsdManager.resolveService(service, resolveListener);
 			}
 
+			/* a device is lost */
 			@Override
 			public void onServiceLost(NsdServiceInfo service) {
 				if (onErrorCallback != null)
@@ -174,6 +216,7 @@ public class AirlinoModule extends KrollModule {
 		};
 		nsdManager.discoverServices(DNSTYPE, NsdManager.PROTOCOL_DNS_SD,
 				discListener);
+
 		new android.os.Handler().postDelayed(new Runnable() {
 			public void run() {
 				if (isPingActive) {
@@ -205,7 +248,6 @@ public class AirlinoModule extends KrollModule {
 		dict.put("port", so.getPort());
 		endpoint += (":" + so.getPort() + "/api/v15/radio.action");
 		dict.put("name", so.getServiceName());
-		dict.put("type", so.getServiceType());
 		dict.put("endpoint", endpoint);
 		Log.d(LCAT, dict.toString());
 		return dict;
