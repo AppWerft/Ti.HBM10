@@ -6,7 +6,7 @@
  * Please see the LICENSE included with this distribution for details.
  *
  */
-package de.appwerft.airlino;
+package ti.airlino;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollFunction;
@@ -212,14 +212,5 @@ public class AirlinoModule extends KrollModule {
 			}
 		}, (isPingActive) ? pingTimeout : scanTimeout);
 	}
-	/*
-	 * private AirlinoDevice parseNsdServiceInfo(NsdServiceInfo so) { endpoint =
-	 * "http://"; AirlinoDevice device = new AirlinoDevice(); InetAddress
-	 * address = so.getHost(); if (address != null) {
-	 * device.setHost(address.getHostAddress()); endpoint +=
-	 * address.getHostAddress(); } device.setPort(so.getPort()); endpoint +=
-	 * (":" + so.getPort() + "/api/v15/radio.action");
-	 * device.setName(so.getServiceName()); device.setEndpoint(endpoint); return
-	 * device; }
-	 */
+
 }

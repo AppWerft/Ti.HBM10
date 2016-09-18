@@ -1,4 +1,4 @@
-package de.appwerft.airlino;
+package ti.airlino;
 
 import java.net.InetAddress;
 import android.net.nsd.NsdServiceInfo;
