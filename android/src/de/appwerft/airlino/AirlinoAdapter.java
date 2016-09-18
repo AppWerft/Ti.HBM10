@@ -1,5 +1,7 @@
 package de.appwerft.airlino;
 
+// http://stackoverflow.com/questions/18146361/how-to-create-jar-file-with-package-structure
+
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
@@ -17,18 +19,18 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 public class AirlinoAdapter {
 	private String ENDPOINT;
 	private Context ctx;
-	private onResultListener resultListener;
+	private onResultHandler resultHandler;
 	HashMap<String, String> map;
 
 	public AirlinoAdapter(Context ctx, String endpoint,
-			onResultListener resultListener) {
+			onResultHandler resultHandler) {
 		this.ctx = ctx;
-		this.resultListener = resultListener;
+		this.resultHandler = resultHandler;
 		this.ENDPOINT = endpoint;
 		map = new HashMap<String, String>();
 	}
 
-	public interface onResultListener {
+	public interface onResultHandler {
 		public void onResult(JSONObject result);
 	}
 
@@ -113,8 +115,8 @@ public class AirlinoAdapter {
 		@Override
 		public void onSuccess(int statusCode, Header[] headers,
 				JSONObject response) {
-			if (resultListener != null)
-				resultListener.onResult(response);
+			if (resultHandler != null)
+				resultHandler.onResult(response);
 		}
 
 		@Override

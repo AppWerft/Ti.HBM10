@@ -7,7 +7,6 @@ import org.appcelerator.titanium.TiApplication;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.view.Gravity;
 import de.appwerft.airlino.AirlinoAdapter;
 
 // https://github.com/luis1987/PayPalAppcelerator/blob/master/android/src/com/bea/paypal/ModulopaypalModule.java
@@ -22,11 +21,9 @@ public class AirlinoConnectionProxy extends KrollProxy {
 
 	public AirlinoConnectionProxy() {
 		super();
-		Context ctx = TiApplication.getInstance();
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void handleCreationDict(KrollDict options) {
 		super.handleCreationDict(options);
@@ -37,18 +34,14 @@ public class AirlinoConnectionProxy extends KrollProxy {
 
 	@Kroll.method
 	public void playRadio() {
+		Context ctx = TiApplication.getInstance();
 		AirlinoAdapter adapter = new AirlinoAdapter(ctx, endpoint,
 				new resultHandler());
 	}
 
-	private final class resultHandler implements
-			AirlinoAdapter.onResultListener {
-
+	private final class resultHandler implements AirlinoAdapter.onResultHandler {
 		@Override
 		public void onResult(JSONObject result) {
-			// TODO Auto-generated method stub
-
 		}
 	}
-
 }
