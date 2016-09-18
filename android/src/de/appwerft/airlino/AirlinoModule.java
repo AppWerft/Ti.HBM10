@@ -8,8 +8,6 @@
  */
 package de.appwerft.airlino;
 
-import java.net.InetAddress;
-
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollFunction;
 import org.appcelerator.kroll.KrollModule;
@@ -36,7 +34,10 @@ public class AirlinoModule extends KrollModule {
 	int scanTimeout = 2000;
 	int pingTimeout = 1000;
 	AirlinoDevices aDevices = new AirlinoDevices();
-
+	@Kroll.constant
+	public final int PLAY = 0;
+	@Kroll.constant
+	public final int STOP = 1;
 	public NsdManager.ResolveListener resolveListener;
 	public NsdManager.DiscoveryListener discListener = null;
 

@@ -37,11 +37,15 @@ Airlino.startScan({
 });
 
 Airlino.stopScan();
+```
 
+Now you have a list of available devices. You can show an UI for user selection. After this you can:
+```javascript
+var airlinoDevice = Airlino.createArlinoDevice(device.endpoint);
 
-Airlino.play({
-    device : device[0],
-    url : URL
-});
+airlinoDevice.playRadio(url,name);
+airlinoDevice.stopRadio(url,name);
+
+console.log(airlinoDevice.deviceStatus());
 
 ```
