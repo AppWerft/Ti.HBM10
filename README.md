@@ -43,9 +43,19 @@ Now you have a list of available devices. You can show an UI for user selection.
 ```javascript
 var airlinoDevice = Airlino.createArlinoDevice(device.endpoint);
 
-airlinoDevice.playRadio(url,name);
-airlinoDevice.stopRadio(url,name);
+airlinoDevice.playRadio({
+    url : "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
+    name : "Deutschlandfunk Köln",
+    onResult : function(){
+        
+    });
+airlinoDevice.stopRadio();
 
-console.log(airlinoDevice.deviceStatus());
+airlinoDevice.deviceStatus({
+    onResult ; function(res) {
+        console.log(res);
+    }
+}));
 
 ```
+<img src="http://i.imgur.com/nxZSfPp.png" width=600 />
