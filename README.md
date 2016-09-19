@@ -30,7 +30,7 @@ airlinoBrowser.startScan({
     onSuccess: function(e) {
         devices = e.devices;
         devices.forEach(function(device){
-            console.log(device.name + " " + device.endpoint);
+            console.log(device.name + " " + device.host +":"+ device.port);
         });
     },
     onError: function() {
