@@ -13,7 +13,7 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 
 @Kroll.proxy(creatableInModule = AirlinoModule.class)
-public class AirlinobrowserProxy extends KrollProxy {
+public class BrowserProxy extends KrollProxy {
 	private static final String LCAT = "AirLino 😈";
 	private Context ctx;
 	private NsdManager nsdManager;
@@ -33,7 +33,7 @@ public class AirlinobrowserProxy extends KrollProxy {
 	public NsdManager.ResolveListener resolveListener;
 	public NsdManager.DiscoveryListener discListener = null;
 
-	public AirlinobrowserProxy() {
+	public BrowserProxy() {
 		super();
 		ctx = TiApplication.getInstance();
 		resolveListener = new NsdManager.ResolveListener() {

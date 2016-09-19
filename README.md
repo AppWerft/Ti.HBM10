@@ -18,7 +18,7 @@ var devices = [];
 
 // test if at leat one is available (i.e. for activating button)
 
-airlinoBrowser = Airlino.create(Browser);
+airlinoBrowser = Airlino.createBrowser();
 airlinoBrowser.isAvailable({
     timeout : 2000,
     onResult : function(e) {
@@ -43,17 +43,17 @@ airlinoBrowser.stopScan();
 
 Now you have a list of available devices. You can show an UI for user selection. After this you can:
 ```javascript
-var airlinoDevice = Airlino.createAirlinoDevice(device.endpoint);
+var airlinoConnection = Airlino.createConnection(device.endpoint);
 
-airlinoDevice.playRadio({
+airlinoConnection.playRadio({
     url : "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
     name : "Deutschlandfunk Köln",
     onResult : function(){
         
     });
-airlinoDevice.stopRadio();
+airlinoConnection.stopRadio();
 
-airlinoDevice.deviceStatus({
+airlinoConnection.deviceStatus({
     onResult ; function(res) {
         console.log(res);
     }

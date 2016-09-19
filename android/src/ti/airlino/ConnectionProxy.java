@@ -17,14 +17,14 @@ import de.appwerft.airlino.AirlinoAdapter;
 // example :https://github.com/paypal/PayPal-Android-SDK/blob/master/SampleApp/src/main/java/com/paypal/example/paypalandroidsdkexample/SampleActivity.java
 
 @Kroll.proxy(creatableInModule = AirlinoModule.class)
-public class AirlinoConnectionProxy extends KrollProxy {
+public class ConnectionProxy extends KrollProxy {
 	private String host;
 	final int DEFAULTPORT = 4949;
 	private int port = DEFAULTPORT;
 	Context ctx;
 	AirlinoAdapter adapter;
 
-	public AirlinoConnectionProxy() {
+	public ConnectionProxy() {
 		super();
 		ctx = TiApplication.getInstance();
 		adapter = new AirlinoAdapter(ctx, host, port);
