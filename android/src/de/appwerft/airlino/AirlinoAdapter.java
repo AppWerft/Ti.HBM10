@@ -124,6 +124,5 @@ public class AirlinoAdapter {
 				String responseString, Throwable throwable) {
 
 		}
-
 	}
 }

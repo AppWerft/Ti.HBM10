@@ -12,7 +12,7 @@ copyright: Copyright (c) 2016 by
 
 # these should not be edited
 name: Airlino
-moduleid: de.appwerft.airlino
+moduleid: ti.airlino
 guid: c17ac4f6-c466-4801-a3ab-5691d34f03ec
 platform: android
 minsdk: 5.2.0.GA

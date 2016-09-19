@@ -15,7 +15,7 @@ import de.appwerft.airlino.AirlinoAdapter;
 @Kroll.proxy(creatableInModule = AirlinoModule.class)
 public class AirlinoConnectionProxy extends KrollProxy {
 	// Standard Debugging variables
-	private static final String LCAT = "Airlino 💰💰";
+	private static final String LCAT = "Airlino 👑👑";
 	private String endpoint;
 	Context ctx;
 
