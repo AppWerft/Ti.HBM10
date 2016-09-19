@@ -18,12 +18,9 @@ import de.appwerft.airlino.AirlinoAdapter;
 
 @Kroll.proxy(creatableInModule = AirlinoModule.class)
 public class AirlinoConnectionProxy extends KrollProxy {
-	// Standard Debugging variables
-	private static final String LCAT = "Airlino 👑👑";
 	private String host;
 	final int DEFAULTPORT = 4949;
 	private int port = DEFAULTPORT;
-
 	Context ctx;
 	AirlinoAdapter adapter;
 
