@@ -7,6 +7,7 @@ import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiApplication;
 
+import de.appwerft.airlino.*;
 import android.app.Activity;
 import android.content.Context;
 import android.net.nsd.NsdManager;

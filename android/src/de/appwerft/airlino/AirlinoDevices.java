@@ -1,4 +1,4 @@
-package ti.airlino;
+package de.appwerft.airlino;
 
 import java.util.ArrayList;
 
