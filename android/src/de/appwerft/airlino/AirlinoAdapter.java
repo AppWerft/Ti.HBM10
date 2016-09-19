@@ -20,93 +20,95 @@ public class AirlinoAdapter {
 	private String ENDPOINT;
 	private Context ctx;
 	private onResultHandler resultHandler;
-	HashMap<String, String> map;
+	HashMap<String, String> map = new HashMap<String, String>();
 
-	public AirlinoAdapter(Context ctx, String endpoint,
-			onResultHandler resultHandler) {
+	public AirlinoAdapter(Context ctx, String host, int port) {
 		this.ctx = ctx;
-		this.resultHandler = resultHandler;
-		this.ENDPOINT = endpoint;
-		map = new HashMap<String, String>();
+		this.ENDPOINT = "http://" + host + ":" + port + "/api/v15/";
 	}
 
 	public interface onResultHandler {
 		public void onResult(JSONObject result);
 	}
 
-	public void playRadio(String url, String name)
+	public void playRadio(String url, String name, onResultHandler resultHandler)
 			throws UnsupportedEncodingException, JSONException {
+		map.clear();
 		map.put("url", url);
 		map.put("action", "play");
 		map.put("name", name);
-		doRequest("radio.action", map);
+		doRequest("radio.action", map, resultHandler);
 	}
 
-	public void stopRadio() throws UnsupportedEncodingException, JSONException {
-		map.put("action", "stop");
-		doRequest("radio.action", map);
-	}
-
-	public void queryRadio() throws UnsupportedEncodingException, JSONException {
-		map.put("action", "query");
-		doRequest("radio.action", map);
-	}
-
-	public void getPlayList() throws UnsupportedEncodingException,
-			JSONException {
-		map.put("action", "getplaylist");
-		doRequest("radio.action", map);
-	}
-
-	public void getFavoriteStation() throws UnsupportedEncodingException,
-			JSONException {
-		map.put("action", "getfavouritestation");
-		doRequest("radio.action", map);
-	}
-
-	public void setFavoriteStation(String url, String name)
+	public void stopRadio(onResultHandler resultHandler)
 			throws UnsupportedEncodingException, JSONException {
+		map.clear();
+		map.put("action", "stop");
+	}
+
+	public void queryRadio(onResultHandler resultHandler)
+			throws UnsupportedEncodingException, JSONException {
+		map.clear();
+		map.put("action", "query");
+		doRequest("radio.action", map, resultHandler);
+	}
+
+	public void getPlayList(onResultHandler resultHandler)
+			throws UnsupportedEncodingException, JSONException {
+		map.clear();
+		map.put("action", "getplaylist");
+		doRequest("radio.action", map, resultHandler);
+	}
+
+	public void getFavoriteStation(onResultHandler resultHandler)
+			throws UnsupportedEncodingException, JSONException {
+		map.put("action", "getfavouritestation");
+		doRequest("radio.action", map, resultHandler);
+	}
+
+	public void setFavoriteStation(String url, String name,
+			onResultHandler resultHandler) throws UnsupportedEncodingException,
+			JSONException {
 		map.put("url", url);
 		map.put("action", "setfavouritestation");
 		map.put("name", name);
-		doRequest("radio.action", map);
+		doRequest("radio.action", map, resultHandler);
 	}
 
-	public void setLEDConfiguration(int brightness)
-			throws UnsupportedEncodingException, JSONException {
+	public void setLEDConfiguration(int brightness,
+			onResultHandler resultHandler) throws UnsupportedEncodingException,
+			JSONException {
 		map.put("brightness", "" + brightness);
 		map.put("action", "set");
-		doRequest("leds.action", map);
+		doRequest("leds.action", map, resultHandler);
 	}
 
-	public void getLEDConfiguration() throws UnsupportedEncodingException,
-			JSONException {
+	public void getLEDConfiguration(onResultHandler resultHandler)
+			throws UnsupportedEncodingException, JSONException {
 		map.put("action", "get");
-		doRequest("leds.action", map);
+		doRequest("leds.action", map, resultHandler);
 	}
 
-	public void playPlayList(int listId) throws UnsupportedEncodingException,
-			JSONException {
+	public void playPlayList(int listId, onResultHandler resultHandler)
+			throws UnsupportedEncodingException, JSONException {
 		map.put("action", "playplaylist");
 		map.put("listid", "" + listId);
-		doRequest("radio.action", map);
+		doRequest("radio.action", map, resultHandler);
 	}
 
-	public void deviceStatus() throws JSONException,
-			UnsupportedEncodingException {
-		map.put("action", "query");
-		doRequest("configure.action", map);
-	}
-
-	private void doRequest(String action, HashMap<String, String> map)
+	public void deviceStatus(onResultHandler resultHandler)
 			throws JSONException, UnsupportedEncodingException {
+		map.put("action", "query");
+		doRequest("configure.action", map, resultHandler);
+	}
+
+	private void doRequest(String action, HashMap<String, String> map,
+			onResultHandler resultHandler) throws JSONException,
+			UnsupportedEncodingException {
 		AsyncHttpClient client = new AsyncHttpClient();
-		JSONObject jsonParams = new JSONObject();
-		for (String key : map.keySet()) {
-			jsonParams.put(key, map.get(key));
-		}
+		JSONObject jsonParams = new JSONObject(map);
 		StringEntity entity = new StringEntity(jsonParams.toString());
-		client.post(ctx, ENDPOINT, entity, "application/json",
+		client.post(ctx, ENDPOINT + action, entity, "application/json",
 				new AirlinoResponseHandler());
 
 	}
@@ -122,7 +124,6 @@ public class AirlinoAdapter {
 		@Override
 		public void onFailure(int statusCode, Header[] headers,
 				String responseString, Throwable throwable) {
-
 		}
 	}
 }
