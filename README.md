@@ -1,12 +1,22 @@
-#TiAirlino
+#TiAirlino HBM10
+ 
+Airlino is a devives for Wifi transmission for in highest level. This device is embedded as OEM (HBM10) in a lot of active HiFi boxes. The spec you [can read here](https://github.com/AppWerft/Ti.Airlino/blob/master/SPEC_HBM10-v4.2.0.pdf)
 
-Airlino is a devives for Wifi transmission for in highest level.
+<img src="http://i.imgur.com/yoUFziR.png" width=600 />
 
 This is a Titanium module for handling airlino device.
 
 
 
-<img src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTviFhBPGfPsHhfypRPOjvsGZcid7GyMLuRxgVsroC8wEG05MxuBsXxDcgJxUI_1fiYAL1zoto&usqp=CAE" width=130>"
+<img src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTviFhBPGfPsHhfypRPOjvsGZcid7GyMLuRxgVsroC8wEG05MxuBsXxDcgJxUI_1fiYAL1zoto&usqp=CAE" width=150>"
+
+
+###Testing
+You can test the Bonjour browsing without device with
+```sh
+dns-sd -R NAME _dockset._tcp. local PORTNUMBER
+``
+
 
 ##Usage
 

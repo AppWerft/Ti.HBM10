@@ -15,7 +15,7 @@ import android.net.nsd.NsdServiceInfo;
 
 @Kroll.proxy(creatableInModule = AirlinoModule.class)
 public class BrowserProxy extends KrollProxy {
-	private static final String LCAT = "AirLino 😈";
+	private static final String LCAT = "AirLino 🔊 🔉 🔈";
 	private Context ctx;
 	private NsdManager nsdManager;
 	private KrollFunction onSuccessCallback = null;
@@ -68,7 +68,6 @@ public class BrowserProxy extends KrollProxy {
 				}
 			}
 		};
-
 	}
 
 	@Override
@@ -135,7 +134,6 @@ public class BrowserProxy extends KrollProxy {
 			scanTimeout = opt.getInt("timeout");
 		}
 		this.initializeDiscoveryListener();
-
 	}
 
 	private void stopDiscoveryListener() {
