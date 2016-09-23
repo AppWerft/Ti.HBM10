@@ -15,7 +15,7 @@ This is a Titanium module for handling airlino device.
 You can test the Bonjour browsing without device with
 ```sh
 dns-sd -R NAME _dockset._tcp. local PORTNUMBER
-``
+```
 
 
 ##Usage
