@@ -30,21 +30,39 @@ public class DiscoveryResolverProxy extends KrollProxy {
 			List<KrollDict> list = new ArrayList<KrollDict>();
 			for (MDNSDiscover.Result result : services.values()) {
 				KrollDict kd = new KrollDict();
+				KrollDict txt = new KrollDict();
 				if (result.txt.dict != null) {
 					for (Map.Entry<String, String> entry : result.txt.dict
 							.entrySet()) {
-						kd.put(entry.getKey(), entry.getValue());
+						if (!entry.getKey().equals(""))
+							txt.put(entry.getKey(), entry.getValue());
 					}
 				}
+				kd.put("txt", txt);
 				kd.put("ip", result.a.ipaddr);
 				kd.put("port", result.srv.port);
 				kd.put("target", result.srv.target);
 				kd.put("fqdn", result.srv.fqdn);
+
+				String[] parts = result.srv.fqdn.split("\\.");
+				if (parts != null) {
+					kd.put("name", parts[0]);
+				} else
+					Log.w(LCAT,
+							"parts is not an array after splitting by '.' of "
+									+ result.srv.fqdn);
+
+				// ;
+
 				kd.put("ttl", result.a.ttl);
+				kd.put("dnstype", dnstype);
+
 				list.add(kd);
 				Log.d(LCAT, kd.toString());
+
 			}
 			res.put("devices", list.toArray());
+
 			if (onChangeCallback != null)
 				onChangeCallback.call(getKrollObject(), res);
 		}
@@ -55,8 +73,8 @@ public class DiscoveryResolverProxy extends KrollProxy {
 
 	private KrollFunction onChangeCallback;
 	private KrollFunction onErrorCallback;
-
-	List<DiscoverResolver> resolvers = new ArrayList<DiscoverResolver>();
+	String dnstype = "dockset";
+	DiscoverResolver resolver;
 
 	public DiscoveryResolverProxy() {
 		super();
@@ -86,7 +104,7 @@ public class DiscoveryResolverProxy extends KrollProxy {
 
 	@Kroll.method
 	public void handleCreationDict(KrollDict opt) {
-		String[] types = null;
+
 		if (opt.containsKeyAndNotNull("onchange")) {
 			Object o = opt.get("onchange");
 			if (o instanceof KrollFunction) {
@@ -101,36 +119,26 @@ public class DiscoveryResolverProxy extends KrollProxy {
 				onErrorCallback = (KrollFunction) o;
 			}
 		}
-		if (opt.containsKeyAndNotNull("types")) {
-			types = opt.getStringArray("types");
+		if (opt.containsKeyAndNotNull("dnstype")) {
+			dnstype = opt.getString("dnstype");
 		}
-		if (types != null) {
-			for (int i = 0; i < types.length; i++) {
-				DiscoverResolver resolver = new DiscoverResolver(ctx, "_"
-						+ types[i] + "._tcp.", new DiscoverResolverHandler());
-				resolvers.add(resolver);
-			}
-		} else
-			Log.e(LCAT, "types are missing");
+
+		resolver = new DiscoverResolver(ctx, "_" + dnstype + "._tcp.",
+				new DiscoverResolverHandler());
 
 	}
 
 	@Kroll.method
 	public void start() {
-		if (resolvers != null) {
-			for (DiscoverResolver resolver : resolvers) {
-				resolver.start();
-			}
+		if (resolver != null) {
+			resolver.start();
 		}
 	}
 
 	@Kroll.method
 	public void stop() {
-		if (resolvers != null) {
-			for (DiscoverResolver resolver : resolvers) {
-				resolver.stop();
-			}
+		if (resolver != null) {
+			resolver.stop();
 		}
-
 	}
 }

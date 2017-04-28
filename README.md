@@ -28,18 +28,61 @@ var devices = [];
 
 // test if at least one device is available (i.e. for activating button)
 
-airlinoBrowser = Airlino.createBrowser();
-airlinoBrowser.isAvailable({
-    timeout : 2000,
-    onResult : function(e) {
-        console.log(e.found); // true or false
-    }
-})
+airlinoBrowser = Airlino.createDiscoveryResolver({
+	dnstype : "dockset", // for Airlino and OEMs
+	onchange : function(e) {
+		console.log(e);
+	}
+});
 
+airlinoBrowser.start();
     
-
-airlinoBrowser.stopScan();
+// later, maybe if dialog is closed
+airlinoBrowser.stop();
 ```
+### Typical answer of airlino devices (type :"dockset")
+```javascript
+{
+	"dnstype" : "dockset",
+	"name" : "airlino",
+	"ip" : "192.168.178.53",
+	"port" : 8989,
+	"fqdn" : "airlino._dockset._tcp.local",
+	"txt" : {
+		"swver" : "4.1.0",
+		"model" : "AirLino",
+		"api" : "v14"
+	},
+	"ttl" : 10,
+	"target" : "AirLino-FB22.local"
+}
+```
+
+### Typical answer of chromecast devices (type :"googlecast")
+```javascript
+{
+	"dnstype" : "googlecast",
+	"name" : "Chromecast-8fd9d3e607e2ee11bee877c8cd5008b8",
+	"ip" : "192.168.178.22",
+	"port" : 8009,
+	"fqdn" : "Chromecast-8fd9d3e607e2ee11bee877c8cd5008b8._googlecast._tcp.local",
+	"txt" : {
+		"st" : "0",
+		"md" : "Chromecast",
+		"id" : "8fd9d3e607e2ee11bee877c8cd5008b8",
+		"fn" : "Elysium",
+		"ve" : "05",
+		"rs" : "",
+		"ic" : "\/setup\/icon.png",
+		"bs" : "FA8FCA536F74",
+		"rm" : "",
+		"ca" : "4101"
+	},
+	"ttl" : 120,
+	"target" : "8fd9d3e6-07e2-ee11-bee8-77c8cd5008b8.local"
+}
+```
+
 
 Now you have a list of available devices. You can show an UI for user selection. After this you can:
 ```javascript
