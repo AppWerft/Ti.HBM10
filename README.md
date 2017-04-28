@@ -16,17 +16,17 @@ You can test the Bonjour browsing without device with
 ```sh
 dns-sd -R NAME _dockset._tcp. local PORTNUMBER
 ```
-
+i.e you start on your Mac, Raspi or what ever.
 
 ## Usage
 
 
 ```javascript
 var URL = "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
-var Airlino = require("de.appwerft.airlino");
+var Airlino = require("ti.airlino");
 var devices = [];
 
-// test if at leat one is available (i.e. for activating button)
+// test if at least one device is available (i.e. for activating button)
 
 airlinoBrowser = Airlino.createBrowser();
 airlinoBrowser.isAvailable({
@@ -36,17 +36,7 @@ airlinoBrowser.isAvailable({
     }
 })
 
-airlinoBrowser.startScan({
-    onSuccess: function(e) {
-        devices = e.devices;
-        devices.forEach(function(device){
-            console.log(device.name + " " + device.host +":"+ device.port);
-        });
-    },
-    onError: function() {
-        console.log("not found");
-    }
-});
+    
 
 airlinoBrowser.stopScan();
 ```

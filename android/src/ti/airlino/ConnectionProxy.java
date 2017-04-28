@@ -26,7 +26,7 @@ public class ConnectionProxy extends KrollProxy {
 
 	public ConnectionProxy() {
 		super();
-		ctx = TiApplication.getInstance();
+		ctx = TiApplication.getInstance().getApplicationContext();
 		adapter = new AirlinoAdapter(ctx, host, port);
 	}
 

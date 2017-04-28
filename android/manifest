@@ -2,7 +2,7 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 1.0.0
+version: 1.0.1
 apiversion: 2
 architectures: armeabi armeabi-v7a x86
 description: Airlino
@@ -11,8 +11,8 @@ license: Specify your license
 copyright: Copyright (c) 2016 by 
 
 # these should not be edited
-name: Airlino
+name: airlino
 moduleid: ti.airlino
 guid: c17ac4f6-c466-4801-a3ab-5691d34f03ec
 platform: android
-minsdk: 5.2.0.GA
+minsdk: 5.0.0.GA

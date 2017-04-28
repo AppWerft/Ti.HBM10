@@ -1,7 +1,5 @@
 package de.appwerft.airlino;
 
-// http://stackoverflow.com/questions/18146361/how-to-create-jar-file-with-package-structure
-
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 

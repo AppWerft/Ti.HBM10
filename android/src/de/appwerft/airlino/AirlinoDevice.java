@@ -1,10 +1,19 @@
 package de.appwerft.airlino;
 
 import java.net.InetAddress;
+
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.kroll.common.Log;
+
+import ti.airlino.AirlinoModule;
 import android.net.nsd.NsdServiceInfo;
 
 public class AirlinoDevice {
+	public static String LCAT = AirlinoModule.LCAT;
 	private String host;
+	private String serviceName;
+	private String name;
+	private int port;
 
 	public String getHost() {
 		return host;
@@ -30,18 +39,16 @@ public class AirlinoDevice {
 		this.port = port;
 	}
 
-	private String name;
-	private int port;
-
-	public static AirlinoDevice parseNsdServiceInfo(NsdServiceInfo so) {
-		AirlinoDevice device = new AirlinoDevice();
-		InetAddress address = so.getHost();
+	public static AirlinoDevice parseNsdServiceInfo(NsdServiceInfo serviceInfo) {
+		AirlinoDevice airlinoDevice = new AirlinoDevice();
+		Log.d(LCAT, serviceInfo.toString());
+		airlinoDevice.serviceName = serviceInfo.getServiceName();
+		InetAddress address = serviceInfo.getHost();
 		if (address != null) {
-			device.setHost(address.getHostAddress());
+			airlinoDevice.setHost(address.getHostAddress());
 		}
-		device.setPort(so.getPort());
-		device.setName(so.getServiceName());
-		return device;
+		airlinoDevice.setPort(serviceInfo.getPort());
+		airlinoDevice.setName(serviceInfo.getServiceName());
+		return airlinoDevice;
 	}
-
 }

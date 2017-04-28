@@ -1,7 +1,7 @@
 #!/bin/bash
 
-APPID=de.appwerft.airlino
-VERSION=1.0.0
+APPID=ti.airlino
+VERSION=1.0.1
 
 #cp android/assets/* iphone/
 cd android;ant clean; rm -rf build/*;ant ;  unzip -uo  dist/$APPID-android-$VERSION.zip  -d  ~/Library/Application\ Support/Titanium/;cd ..
