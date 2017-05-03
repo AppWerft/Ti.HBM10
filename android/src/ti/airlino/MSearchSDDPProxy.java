@@ -3,29 +3,32 @@ package ti.airlino;
 import java.io.*;
 import java.net.*;
 
-public class MSearchSDDPRequest {
+import org.appcelerator.kroll.KrollProxy;
+
+public class MSearchSDDPProxy extends KrollProxy {
 	final static int DEFAULTPORT = 1900;
+	final static String MULTICASTHOST = "239.255.255.250";
+	final static String LF = "\n";
 
 	/*
 	 * multicast SSDP M-SEARCH
 	 */
-	// http://www.meshcommander.com/upnptools
 	// http://192.168.1.151:49152/upmpd/icon.png
-	public static String mSearch(String host, int port) throws IOException {
-		if (port == 0)
-			port = DEFAULTPORT;
+	public String start() throws IOException {
 		/* create byte arrays to hold our send and response data */
 		byte[] sendData = new byte[1024];
 		byte[] receiveData = new byte[1024];
 		/* our M-SEARCH data as a byte array */
-		String MSEARCH = "M-SEARCH * HTTP/1.1\nHost: " + host + ":" + port
-				+ "\nMan: \"ssdp:discover\"\nST: roku:ecp\n";
+		String MSEARCH = "M-SEARCH * HTTP/1.1" + LF //
+				+ "HOST:" + MULTICASTHOST + ":" + DEFAULTPORT + LF //
+				+ "Man: \"ssdp:discover\"" + LF//
+				+ "ST: urn:schemas-upnp-org:device:ZonePlayer:1" + LF;
 		sendData = MSEARCH.getBytes();
 		/* create a packet from our data destined for 239.255.255.250:1900 */
 		DatagramPacket sendPacket = null;
 		try {
 			sendPacket = new DatagramPacket(sendData, sendData.length,
-					InetAddress.getByName(host), port);
+					InetAddress.getByName(MULTICASTHOST), DEFAULTPORT);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

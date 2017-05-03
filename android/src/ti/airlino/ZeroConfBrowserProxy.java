@@ -19,7 +19,7 @@ import com.youview.tinydnssd.MDNSDiscover;
 import com.youview.tinydnssd.MDNSDiscover.Result;
 
 @Kroll.proxy(creatableInModule = AirlinoModule.class)
-public class DiscoveryResolverProxy extends KrollProxy {
+public class ZeroConfBrowserProxy extends KrollProxy {
 
 	private final class DiscoverResolverHandler implements
 			DiscoverResolver.Listener {
@@ -76,7 +76,7 @@ public class DiscoveryResolverProxy extends KrollProxy {
 	String dnstype = "dockset";
 	DiscoverResolver resolver;
 
-	public DiscoveryResolverProxy() {
+	public ZeroConfBrowserProxy() {
 		super();
 		ctx = TiApplication.getInstance().getBaseContext();
 		Log.d(LCAT, "BrowserProxy started");
