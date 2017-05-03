@@ -1,6 +1,6 @@
-# TiAirlino HBM10
+# Ti.HBM10
  
-Airlino is a devives for Wifi transmission for in highest level. This device is embedded as OEM (HBM10) in a lot of active HiFi boxes. The spec you [can read here](https://github.com/AppWerft/Ti.Airlino/blob/master/SPEC_HBM10-v4.2.0.pdf)
+Airlino is a devive for WiFi transmission for in highest level. This device is embedded as OEM (HBM10) in a lot of active HiFi boxes. The spec you [can read here](https://github.com/AppWerft/Ti.Airlino/blob/master/SPEC_HBM10-v4.2.0.pdf)
 
 <img src="http://i.imgur.com/yoUFziR.png" width=600 />
 
@@ -23,22 +23,22 @@ i.e you start on your Mac, Raspi or what ever.
 
 ```javascript
 var URL = "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
-var Airlino = require("ti.airlino");
+var HBM10 = require("ti.airlino");
 var devices = [];
 
 // test if at least one device is available (i.e. for activating button)
 
-airlinoBrowser = Airlino.createDiscoveryResolver({
+Browser = HBM10.createZeroConfBrowser({
 	dnstype : "dockset", // for Airlino and OEMs
 	onchange : function(e) {
 		console.log(e);
 	}
 });
 
-airlinoBrowser.start();
+Browser.start();
     
 // later, maybe if dialog is closed
-airlinoBrowser.stop();
+Browser.stop();
 ```
 ### Typical answer of airlino devices (type :"dockset")
 ```javascript
@@ -83,20 +83,19 @@ airlinoBrowser.stop();
 }
 ```
 
-
 Now you have a list of available devices. You can show an UI for user selection. After this you can:
 ```javascript
-var airlinoConnection = Airlino.createConnection(device.endpoint);
+var Connection = HBM10.createConnection(device.endpoint);
 
-airlinoConnection.playRadio({
+Connection.playRadio({
     url : "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
     name : "Deutschlandfunk Köln",
     onResult : function(){
         
     });
-airlinoConnection.stopRadio();
+Connection.stopRadio();
 
-airlinoConnection.deviceStatus({
+Connection.deviceStatus({
     onResult ; function(res) {
         console.log(res);
     }

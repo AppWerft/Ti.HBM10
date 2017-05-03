@@ -11,9 +11,13 @@ import android.os.AsyncTask;
 
 @Kroll.proxy(creatableInModule = AirlinoModule.class)
 public class MSearchProxy extends KrollProxy {
-	final static int DEFAULTPORT = 1900;
-	final static String MULTICASTHOST = "239.255.255.250";
-	final static String LF = "\n";
+	final int SSDP_PORT = 1900;
+	final int SSDP_SEARCH_PORT = 1901;
+	// Broadcast address for finding routers.
+	final String SSDP_IP = "239.255.255.250";
+	// Time out of the connection.
+	int TIMEOUT = 5000;
+	final static String SEP = "\n\n";
 
 	/*
 	 * multicast SSDP M-SEARCH
@@ -28,14 +32,19 @@ public class MSearchProxy extends KrollProxy {
 	private class doMSearchRequest extends AsyncTask<Void, Void, String> {
 		@Override
 		protected String doInBackground(Void... params) {
+			try {
+				InetAddress localhost = InetAddress.getLocalHost();
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
+			}
 			/* create byte arrays to hold our send and response data */
 			byte[] sendData = new byte[1024];
 			byte[] receiveData = new byte[1024];
 			/* our M-SEARCH data as a byte array */
-			String MSEARCH = "M-SEARCH * HTTP/1.1" + LF //
-					+ "HOST:" + MULTICASTHOST + ":" + DEFAULTPORT + LF //
-					+ "Man: \"ssdp:discover\"" + LF//
-					+ "ST: urn:schemas-upnp-org:device:ZonePlayer:1" + LF;
+			String MSEARCH = "M-SEARCH * HTTP/1.1" + SEP //
+					+ "HOST:" + SSDP_IP + ":" + SSDP_PORT + SEP //
+					+ "Man: \"ssdp:discover\"" + SEP//
+					+ "ST: urn:schemas-upnp-org:device:ZonePlayer:1" + SEP;
 			sendData = MSEARCH.getBytes();
 			/*
 			 * create a packet from our data destined for 239.255.255.250:1900
@@ -43,7 +52,7 @@ public class MSearchProxy extends KrollProxy {
 			DatagramPacket sendPacket = null;
 			try {
 				sendPacket = new DatagramPacket(sendData, sendData.length,
-						InetAddress.getByName(MULTICASTHOST), DEFAULTPORT);
+						InetAddress.getByName(SSDP_IP), SSDP_PORT);
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			}
