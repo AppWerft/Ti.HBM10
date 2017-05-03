@@ -4,12 +4,16 @@ import java.io.*;
 import java.net.*;
 
 public class MSearchSDDPRequest {
+	final static int DEFAULTPORT = 1900;
 
 	/*
 	 * multicast SSDP M-SEARCH
 	 */
-
-	public static void mSearch(String host, int port) throws IOException {
+	// http://www.meshcommander.com/upnptools
+	// http://192.168.1.151:49152/upmpd/icon.png
+	public static String mSearch(String host, int port) throws IOException {
+		if (port == 0)
+			port = DEFAULTPORT;
 		/* create byte arrays to hold our send and response data */
 		byte[] sendData = new byte[1024];
 		byte[] receiveData = new byte[1024];
@@ -42,8 +46,8 @@ public class MSearchSDDPRequest {
 		/* get the response as a string */
 		String response = new String(receivePacket.getData());
 		/* print the response */
-		System.out.println(response);
 		/* close the socket */
 		clientSocket.close();
+		return response;
 	}
 }
